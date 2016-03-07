@@ -1,14 +1,39 @@
-import TweetBox from "./components/TweetBox"
-import TweetList from "./components/TweetList"
+import TweetBox from "./components/TweetBox";
+import TweetList from "./components/TweetList";
+import TweetStore from "./stores/TweetStore";
 
-/*global React*/
+import TweetActions from "./actions/TweetActions";
+TweetActions.getAllTweets();
+
+let getAppState = () => {
+  return { tweetsList: TweetStore.getAll() };
+}
+
 
 class Main extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = getAppState();
+    this._onChange = this._onChange.bind(this);
+  }
+  
+  componentDidMount() {
+      TweetStore.addChangeListener(this._onChange)
+  }
+  
+  componentWillUnmount() {
+      TweetStore.removeChangeListener(this._onChange)
+  }
+  
+  _onChange() {
+    this.setState(getAppState());
+  }
+  
   render() {
     return (
       <div className="container">
         <TweetBox />
-        <TweetList />
+        <TweetList tweets={this.state.tweetsList} />
       </div>
     );
   }
@@ -16,10 +41,13 @@ class Main extends React.Component {
 
 
 let documentReady = () => {
-    React.render(
-        <Main />,
-        document.getElementById('react')
-    );
+  
+  let reactNode = document.getElementById('react');
+  if (reactNode) {
+    React.render( <Main />, reactNode);
+  }
+  
+    
 };
 
 $(documentReady);
